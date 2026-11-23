@@ -1,38 +1,29 @@
 {
   "name": "ms2",
   "version": "1.0.0",
-  "description": "ms2 walking skeleton",
-  "main": "dist/server.js",
+  "description": "Dieser Service ist für die Verwaltung der Immobilien zuständig (Projekt 5: Immobilienplattform).",
+  "type": "commonjs",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "test": "node --test",
     "dev": "tsx watch src/server.ts",
+    "lint": "tsc --noEmit",
     "build": "tsc",
     "start": "node dist/server.js",
-    "lint": "tsc --noEmit"
+    "test": "tsx --test test/*.test.ts"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/m324-ap23a-team4/ms2.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/m324-ap23a-team4/ms2/issues"
-  },
-  "homepage": "https://github.com/m324-ap23a-team4/ms2#readme",
   "dependencies": {
-    "dotenv": "^18.0.10",
+    "dotenv": "^17.4.2",
     "express": "^5.3.0",
     "pg": "^8.23.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "^26.6.6",
+    "@types/node": "^20.19.43",
     "@types/pg": "^8.23.1",
-    "ts-node": "^10.9.2",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "^5.9.3"
   }
 }

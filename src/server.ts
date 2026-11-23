@@ -1,17 +1,40 @@
-import "dotenv/config";
-import express from "express";
+import 'dotenv/config';
+import { Pool } from 'pg';
+import { createApp } from './app';
 
-const app = express();
-app.use(express.json());
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5000 });
 
-const PORT = Number(process.env.PORT) || 3000;
-/** Basis-URL von MS1 – wird für die Ortschafts-Validierung (US3) benötigt. */
-export const MS1_URL = process.env.MS1_URL || "http://localhost:3001";
+async function start() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS immobilien (
+      id UUID PRIMARY KEY,
+      typ TEXT NOT NULL,
+      zimmer DOUBLE PRECISION NOT NULL CHECK (zimmer > 0),
+      flaeche DOUBLE PRECISION NOT NULL CHECK (flaeche > 0),
+      ortschaft_id UUID NOT NULL,
+      preis NUMERIC NOT NULL CHECK (preis > 0),
+      verkaufsdatum DATE
+    )
+  `);
 
-app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "ok", service: "ms2" });
-});
+  const app = createApp({
+    ms1Url: process.env.MS1_URL || 'http://localhost:3001',
+    async insert({ id, typ, zimmer, flaeche, ortschaftId, preis, verkaufsdatum }) {
+      await pool.query(
+        `INSERT INTO immobilien (id, typ, zimmer, flaeche, ortschaft_id, preis, verkaufsdatum)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [id, typ, zimmer, flaeche, ortschaftId, preis, verkaufsdatum],
+      );
+    },
+  });
 
-app.listen(PORT, () => {
-  console.log(`ms2 läuft auf Port ${PORT} (MS1_URL=${MS1_URL})`);
+  const port = Number(process.env.PORT || 3000);
+  app.listen(port, () => console.log(`MS2 hört auf Port ${port}`));
+}
+
+pool.on('error', (error) => console.error('MS2-Datenbankverbindung unterbrochen', error));
+start().catch(async (error) => {
+  console.error('MS2 konnte nicht gestartet werden', error);
+  await pool.end();
+  process.exitCode = 1;
 });
